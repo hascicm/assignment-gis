@@ -55,4 +55,4 @@ Trail data is coming directly from Open Street Maps. I downloaded an extent cove
 "stroke":"#12ec00"}}
 
 ```
-This is snippet of full response with multiple results.
+This is partioan snippet of full response with multiple results.
