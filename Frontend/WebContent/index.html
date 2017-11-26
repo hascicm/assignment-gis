@@ -1,0 +1,196 @@
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>PDT</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+	<script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.40.0/mapbox-gl.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.40.0/mapbox-gl.css' rel='stylesheet' />
+	<link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+	<link rel="stylesheet" href="navigation.css">
+
+</head>
+
+<body>
+
+	<div class='sidebar pad2'>
+
+		<hr>
+		<h2>your interests </h2>
+		<div class="interest">
+			<input type="checkbox" id = "zaujmy1">peak<br>
+		</div>
+		<div class="interest">
+			<input type="checkbox" id = "zaujmy2">saddle<br>
+		</div>
+		<div class="interest">
+			<input type="checkbox"  id = "zaujmy3">cave<br>
+		</div>
+		<div class="interest">
+			<input type="checkbox"  id = "zaujmy4">spring<br>
+		</div>			
+		<div class="interest">
+			<input type="checkbox" id = "zaujmy5">valley<br>
+		</div>
+		<div class="interest">
+			<input type="checkbox"  id = "zaujmyall">doesn't matter<br>
+		</div>
+		<hr>
+		<h2>your location</h2>
+		<div class="interest">
+			<input type="checkbox"  id = "distance">set max distance from you<br>
+		</div>
+		<div id="slidecontainer">
+			<input type="range" min="1" max="100" value="50" class="slider" id="distanceFromMe">
+		</div>
+		<hr>
+		<h2>Trail difficulty</h2>
+		<div class="interest">							
+			<input type="checkbox" class="interest" id = "dificultyeasy">short<br>
+		</div>
+		<div class="interest">							
+			<input type="checkbox" class="interest" id = "dificultymedium">medium<br>
+		</div>		
+		<div class="interest">							
+			<input type="checkbox" class="interest" id = "dificultyhard">long<br>
+		</div>
+		<div class="loader" id="loader" style="visibility: hidden"></div>
+		<div class="buttoncontainer">
+			<button class="button" type="button" onclick="customsearch()">search</button> 
+		</div>
+		<hr>
+		<h2>Trails and usefull points in TANAP </h2>
+		<div id='menu' class='menu'>
+			<a href='#' id='querry1'>all trails</a> 			
+			<a href='#' id='querry2'>colorcode by leangth</a>
+			<a href='#' id='querry4'>trails with nearby points of interast</a> 
+			<a href='#' id='querry5'>amenities near me</a> 
+			<div id="slidecontainer">
+				<input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+			</div>
+			<a href='#' id='clear'>clear map</a>
+
+		</p>
+	</div>
+</div>
+
+</div>
+<div id='map' class='map pad2'>Map</div>
+
+</body>
+
+
+
+<style type='text/css'>
+#info {
+	display: block;
+	position: relative;
+	margin: 0px auto;
+	width: 50%;
+	padding: 10px;
+	border: none;
+	border-radius: 3px;
+	font-size: 12px;
+	text-align: center;
+	color: #222;
+	background: #fff;
+}
+
+<pre id='info'></pre>
+</style>
+<script>
+	L.mapbox.accessToken = 'pk.eyJ1IjoiaGFzY2ljbSIsImEiOiJjajhpeGF1MGUxNDNvMndteDFlZXphODlmIn0.kWl4BZqkhgs2uwkYfw_eTw';
+	var map = L.mapbox.map('map', 'mapbox.outdoors').setView([49, 20], 9);
+	var myLayer = L.mapbox.featureLayer().addTo(map);
+
+	myLayer.on('layeradd', function(e) {
+		var popupContent = e.layer.feature.properties.name;
+		e.layer.bindPopup(popupContent,{closeButton: true,  minWidth: 100});
+
+	}
+	);
+
+
+	map.on('click', addMarker);
+
+	function addMarker(e){
+		if (typeof circleMarker !== "undefined" ){ 
+			map.removeLayer(circleMarker);         
+		}
+  //add marker
+  circleMarker = new  L.marker(e.latlng, {
+  }).addTo(map);
+}
+
+function customsearch() {
+	document.getElementById("loader").style.visibility='visible';
+	var zaujem1 = document.getElementById("zaujmy1").checked;
+	var zaujem2 = document.getElementById("zaujmy2").checked;
+	var zaujem3 = document.getElementById("zaujmy3").checked;
+	var zaujem4 = document.getElementById("zaujmy4").checked;
+	var zaujem5 = document.getElementById("zaujmy5").checked;
+	var zaujem6 = document.getElementById("zaujmyall").checked;
+	var mypos = document.getElementById("distance").checked;
+	var distance = document.getElementById("distanceFromMe").value;
+	var easy = document.getElementById("dificultyeasy").checked;
+	var medium = document.getElementById("dificultymedium").checked;
+	var hard = document.getElementById("dificultyhard").checked;
+
+	alert("http://localhost:8080/PDT/customsearch/" + zaujem1  + "/" + zaujem2+ "/" + zaujem3+ "/" + zaujem4+ "/" + zaujem5+ "/" + zaujem6+ "/" + mypos+ "/" + distance+ "/" + easy+ "/" + medium+ "/" + hard + "/" + circleMarker.getLatLng().lng+"/"+circleMarker.getLatLng().lat);
+	jQuery.get("http://localhost:8080/PDT/customsearch/" + zaujem1  + "/" + zaujem2+ "/" + zaujem3+ "/" + zaujem4+ "/" + zaujem5+ "/" + zaujem6+ "/" + mypos+ "/" + distance+ "/" + easy+ "/" + medium+ "/" + hard + "/" + circleMarker.getLatLng().lng+"/"+circleMarker.getLatLng().lat , function(response){
+
+		var geojson = response;
+	//	console.log("http://localhost:8080/PDT/customsearch/" + zaujem1  + "/" + zaujem2+ "/" + zaujem3+ "/" + zaujem4+ "/" + zaujem5+ "/" + zaujem6+ "/" + mypos+ "/" + distance+ "/" + easy+ "/" + medium+ "/" + hard + "/" + circleMarker.getLatLng().lng+"/"+circleMarker.getLatLng().lat);
+		myLayer.setGeoJSON(geojson);
+		document.getElementById("loader").style.visibility='hidden';
+	});
+}
+
+
+document.querySelector('#querry1').onclick = function() {
+	jQuery.get("http://localhost:8080/PDT/querry1", function(response) { 
+		var geojson = response;
+	//	console.log(response);
+		myLayer.setGeoJSON(geojson);
+	});
+};		
+
+document.querySelector('#querry2').onclick = function() {
+	jQuery.get("http://localhost:8080/PDT/querry2", function(response) { 
+		var geojson = response;
+	//	console.log(response);
+		myLayer.setGeoJSON(geojson);
+	});
+};		
+
+
+document.querySelector('#querry4').onclick = function() {
+	var center = map.getCenter();
+	jQuery.get("http://localhost:8080/PDT/querry4/"+circleMarker.getLatLng().lng+"/"+circleMarker.getLatLng().lat+"/"+document.getElementById("myRange").value, function(response) { 
+		var geojson = response;
+	//	console.log(response);
+		myLayer.setGeoJSON(geojson);
+	});
+};
+
+document.querySelector('#querry5').onclick = function() {
+	var center = map.getCenter();
+	jQuery.get("http://localhost:8080/PDT/querry5/"+circleMarker.getLatLng().lng+"/"+circleMarker.getLatLng().lat+"/"+document.getElementById("myRange").value, function(response) { 
+		var geojson = response;
+	//	console.log(response);
+		myLayer.setGeoJSON(geojson);
+	});
+};
+document.querySelector('#clear').onclick = function() {
+	if (typeof myLayer !== "undefined" ){ 
+			map.removeLayer(myLayer);         
+		}
+	alert(document.getElementById("myRange").value);
+	myLayer.clearLayers();
+};
+
+</script>
+</body>
+</html> 
