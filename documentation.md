@@ -8,7 +8,7 @@ User can choose one of the following features:
 - show trails and points of interest in specified location
 - amenities in specified location
 
-This is it in action:
+This is it in action(to be edited):
 
 ![Screenshot](screenshot.png)
 
