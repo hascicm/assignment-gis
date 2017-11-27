@@ -10,7 +10,7 @@ User can choose one of the following features:
 
 This is it in action:
 
-![Screenshot](screenshot.png)
+![Screenshot](Screenshot.png)
 
 The application has 2 separate parts, the client which is a [frontend web application](#frontend) using mapbox API and mapbox.js and the [backend application](#backend) written in [Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), backed by PostGIS. The frontend application communicates with backend using a [REST API](#api).
 
