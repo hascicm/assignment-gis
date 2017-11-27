@@ -1,27 +1,58 @@
-# General course assignment
+# Overview
 
-Build a map-based application, which lets the user see geo-based data on a map and filter/search through it in a meaningfull way. Specify the details and build it in your language of choice. The application should have 3 components:
+This application let user choose right trail for they're trip. Application can show trails based on user input. 
+User can choose one of the following features:
+- main search is based on user preferences, user can choose which type of natural sights he want to see from trail, choose which general area he is interested in and desired trail difficulty.
+- show all trails in TANAP
+- color code trails by their length
+- show trails and points of interest in specified location
+- amenities in specified location
 
-1. Custom-styled background map, ideally built with [mapbox](http://mapbox.com). Hard-core mode: you can also serve the map tiles yourself using [mapnik](http://mapnik.org/) or similar tool.
-2. Local server with [PostGIS](http://postgis.net/) and an API layer that exposes data in a [geojson format](http://geojson.org/).
-3. The user-facing application (web, android, ios, your choice..) which calls the API and lets the user see and navigate in the map and shows the geodata. You can (and should) use existing components, such as the Mapbox SDK, or [Leaflet](http://leafletjs.com/).
+This is it in action:
 
-## Example projects
+![Screenshot](screenshot.png)
 
-- Showing nearby landmarks as colored circles, each type of landmark has different circle color and the more interesting the landmark is, the bigger the circle. Landmarks are sorted in a sidebar by distance to the user. It is possible to filter only certain landmark types (e.g., castles).
+The application has 2 separate parts, the client which is a [frontend web application](#frontend) using mapbox API and mapbox.js and the [backend application](#backend) written in [Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), backed by PostGIS. The frontend application communicates with backend using a [REST API](#api).
 
-- Showing bicykle roads on a map. The roads are color-coded based on the road difficulty. The user can see various lists which help her choose an appropriate road, e.g. roads that cross a river, roads that are nearby lakes, roads that pass through multiple countries, etc.
+# Frontend
 
-## Data sources
+The frontend application is a static HTML page (`index.html`), which shows a mapbox.js widget. It is displaying trails, which are mostly in High Tatras, thus the map style is based on the outdoors style. 
 
-- [Open Street Maps](https://www.openstreetmap.org/)
+All relevant frontend code is in `index.html` in style part of the document Styling is located in separate file navigation.css. Responsibilities of front-end are:
+- displaying the sidebar panel with all features calling the appropriate backend APIs
+- displaying geo features by overlaying the map with a geojson layer, the geojson is provided directly by backend APIs
+- getting user defined position based on dropped pin on map
 
-## My project
+# Backend
 
-Fill in (either in English, or in Slovak):
+The backend application is written in Java and is responsible for querying geo data, formatting the geojson and data for the sidebar panel.
+It is implemented as web aplication using jetty server. interfaces are implemented as rest web services. To speed up development, project was created using maven with web aplication archtype.
 
-**Application description**: `<fill in>`
+## Data
 
-**Data source**: `<fill in>`
+Trail data is coming directly from Open Street Maps. I downloaded an extent covering whole middle Slovakia and imported it using the `osm2pgsql` tool into the standard OSM schema. All deployed interfaces are located in class `Resources.java`. Database connector is located in class `Connector.java`. All queries are constructed and executed from class `QueryManager.java`. 
 
-**Technologies used**: `<fill in>`
+
+## Api
+
+**Find all trails in TANAP with color coding based on length**
+
+`http://localhost:8080/PDT/querry2`
+
+### Response
+
+{"geometry":
+{"coordinates":
+[[20.324003495502,49.2249381078786],
+[20.3231145226969,49.2255244927382],
+[20.3212436014546,49.226760014246],
+[20.3172388220865,49.2294943610653]],
+"type":"LineString"},
+"type":"Feature",
+"properties":
+{"name":"neznáme dĺžka: 706.80976418901696",
+"stroke-width":"10",
+"stroke":"#12ec00"}}
+
+```
+This is partioan snippet of full response with multiple results.
